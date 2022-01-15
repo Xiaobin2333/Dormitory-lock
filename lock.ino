@@ -9,7 +9,7 @@ Servo lockservo;
 const char* ssid = "ssid"; //接入wifi
 const char* password = "password";
 
-const char* assid = "ssid"; //创建ap接入点
+const char* assid = "ssid"; //创建ap接入点，新版本已取消ap模式使esp8266进入睡眠模式降低功耗
 const char* asecret = "password";
 
 WiFiServer server(80);
@@ -20,8 +20,11 @@ unsigned long previousMillis = 0;
 const long interval = 5000; //开锁时长ms
 
 void setup() {
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.softAP(assid, asecret);  
+  WiFi.mode(WIFI_STA);
+  /*需要ap模式请取消此处注释，使用ap模式将无法进入睡眠模式降低功耗
+  //WiFi.mode(WIFI_AP_STA);
+  //WiFi.softAP(assid, asecret);  
+  */
   WiFi.begin(ssid, password); 
   lockservo.attach(2); //定义舵机接口
   lockservo.write(0); //初始化舵机角度
@@ -90,8 +93,8 @@ void loop() {
         }
       }
     }
-
-    delay(1);
+    wifi_set_sleep_type(LIGHT_SLEEP_T);
+    delay(1000); //delay单位ms越高越省电建议不要超过5000ms
     client.flush();
   } 
   unsigned long currentMillis = millis();
